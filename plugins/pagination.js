@@ -18,9 +18,6 @@
  *  - POSTS_PER_PAGE: number of posts per page (default: 20)
  *  - Compatible with list containers like:
  *      .blog-posts, ul.blog-posts, .posts, ul.posts
- * 
- * Author: [Your Name or Alias]
- * Repository: [repository link when available]
  */
 
 document.addEventListener('DOMContentLoaded', () => {
