@@ -13,6 +13,7 @@
   const MAIN_SELECTOR = 'body.post main';
   const TITLE_SELECTOR = `${MAIN_SELECTOR} h1`;
   const TAGS_SELECTOR = '.tags';
+  const UPVOTE_SELECTOR = '#upvote-form';
 
   // Run function after DOM is fully ready
   function onReady(fn) {
@@ -70,12 +71,18 @@
     wrapper.className = WRAPPER_CLASS;
     wrapper.appendChild(a);
 
-    // Insert before tags section if available, otherwise at the end of <main>
+    // Insert before tags section if available,
+    // otherwise before upvote form (if present) or at the end of <main>
     const tags = main.querySelector(TAGS_SELECTOR);
     if (tags && tags.parentNode) {
       tags.parentNode.insertBefore(wrapper, tags);
     } else {
-      main.appendChild(wrapper);
+      const upvote = main.querySelector(UPVOTE_SELECTOR);
+      if (upvote && upvote.parentNode) {
+        upvote.parentNode.insertBefore(wrapper, upvote);
+      } else {
+        main.appendChild(wrapper);
+      }
     }
   });
 })();
