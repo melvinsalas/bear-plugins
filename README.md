@@ -15,7 +15,7 @@ A lightweight JavaScript plugin that adds a customizable **"Reply via email"** l
 
 ```html
 <script 
-  src="https://cdn.jsdelivr.net/gh/melvinsalas/bear-plugins/plugins/reply.js"
+  src="https://cdn.jsdelivr.net/gh/melvinsalas/bear-plugins@master/plugins/reply.js"
   data-email="contact@example.com"
   data-text="Reply via email">
 </script>
