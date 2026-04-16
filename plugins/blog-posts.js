@@ -3,62 +3,85 @@ function formatMonthYear(date) {
     return date.toLocaleString('default', { month: 'long', year: 'numeric' });
 }
 
-// Function to organize blog posts by month
 function organizeBlogPosts() {
     const blogPostsList = document.querySelector('.blog-posts');
     if (!blogPostsList) return;
 
-    // Get all list items
-    const posts = Array.from(blogPostsList.querySelectorAll('li'));
-    
-    // Group posts by month
-    const postsByMonth = new Map();
-    
+    const posts = blogPostsList.querySelectorAll('li');
+
+    // year -> month -> posts
+    const postsByYear = new Map();
+
     posts.forEach(post => {
         const timeElement = post.querySelector('time');
         if (!timeElement) return;
-        
+
         const date = new Date(timeElement.getAttribute('datetime'));
-        const monthYear = formatMonthYear(date);
-        
-        if (!postsByMonth.has(monthYear)) {
-            postsByMonth.set(monthYear, []);
+        const year = date.getFullYear();
+        const month = date.getMonth(); // 0-11
+
+        let monthsMap = postsByYear.get(year);
+        if (!monthsMap) {
+            monthsMap = new Map();
+            postsByYear.set(year, monthsMap);
         }
-        postsByMonth.get(monthYear).push(post);
+
+        let monthPosts = monthsMap.get(month);
+        if (!monthPosts) {
+            monthPosts = [];
+            monthsMap.set(month, monthPosts);
+        }
+
+        monthPosts.push({ post, date });
     });
 
-    // Clear the list
     blogPostsList.innerHTML = '';
 
-    // Sort months in descending order (newest first)
-    const sortedMonths = Array.from(postsByMonth.keys()).sort((a, b) => {
-        const dateA = new Date(a);
-        const dateB = new Date(b);
-        return dateB - dateA;
-    });
+    const fragment = document.createDocumentFragment();
 
-    // Add posts back with headers
-    sortedMonths.forEach(monthYear => {
-        // Create and add month header
-        const header = document.createElement('h2');
-        header.textContent = monthYear;
-        header.className = 'month-header';
-        blogPostsList.appendChild(header);
+    // Sort years DESC
+    const sortedYears = Array.from(postsByYear.keys()).sort((a, b) => b - a);
 
-        // Add posts for this month
-        postsByMonth.get(monthYear).forEach(post => {
-            blogPostsList.appendChild(post);
+    sortedYears.forEach(year => {
+        const yearHeader = document.createElement('h2');
+        yearHeader.textContent = year;
+        yearHeader.className = 'year-header';
+        fragment.appendChild(yearHeader);
+
+        const monthsMap = postsByYear.get(year);
+
+        // Sort months DESC
+        const sortedMonths = Array.from(monthsMap.keys()).sort((a, b) => b - a);
+
+        sortedMonths.forEach(month => {
+            const sampleDate = new Date(year, month);
+
+            const header = document.createElement('h3');
+            header.textContent = formatMonthYear(sampleDate);
+            header.className = 'month-header';
+            fragment.appendChild(header);
+
+            const monthPosts = monthsMap.get(month)
+                .sort((a, b) => b.date - a.date);
+
+            monthPosts.forEach(({ post }) => {
+                fragment.appendChild(post);
+            });
         });
     });
+
+    blogPostsList.appendChild(fragment);
 }
 
 // Run the organization when the DOM is loaded
 const validClasses = ["blog", "life", "notes", "travel", "tech", "all"];
-const shouldRun = document.querySelector(".blog-posts") && validClasses.some(cls => document.body.classList.contains(cls));
+const shouldRun = document.querySelector(".blog-posts") &&
+    validClasses.some(cls => document.body.classList.contains(cls));
+
 if (shouldRun) {
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", organizeBlogPosts);
-  } else {
-    organizeBlogPosts();
-  }
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", organizeBlogPosts);
+    } else {
+        organizeBlogPosts();
+    }
 }
